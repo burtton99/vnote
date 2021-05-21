@@ -97,6 +97,8 @@ namespace vnotex
 
         void setupViewer();
 
+        void setupPreviewHelper();
+
         void syncTextEditorFromBuffer(bool p_syncPositionFromReadMode);
 
         void syncViewerFromBuffer(bool p_syncPositionFromEditMode);

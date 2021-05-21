@@ -8,6 +8,7 @@
 #include <QComboBox>
 #include <QSpinBox>
 #include <QHBoxLayout>
+#include <QPushButton>
 
 #include <widgets/widgetsfactory.h>
 #include <core/editorconfig.h>
@@ -16,6 +17,7 @@
 #include <utils/widgetutils.h>
 
 #include "editorpage.h"
+#include <widgets/locationinputwithbrowsebutton.h>
 
 using namespace vnotex;
 
@@ -76,6 +78,11 @@ void MarkdownEditorPage::loadInternal()
     m_smartTableCheckBox->setChecked(markdownConfig.getSmartTableEnabled());
 
     m_spellCheckCheckBox->setChecked(markdownConfig.isSpellCheckEnabled());
+
+    {
+        int idx = m_plantUmlModeComboBox->findData(markdownConfig.getWebPlantUml() ? 0 : 1);
+        m_plantUmlModeComboBox->setCurrentIndex(idx);
+    }
 }
 
 void MarkdownEditorPage::saveInternal()
@@ -117,6 +124,8 @@ void MarkdownEditorPage::saveInternal()
     markdownConfig.setSmartTableEnabled(m_smartTableCheckBox->isChecked());
 
     markdownConfig.setSpellCheckEnabled(m_spellCheckCheckBox->isChecked());
+
+    markdownConfig.setWebPlantUml(m_plantUmlModeComboBox->currentData().toInt() == 0);
 
     EditorPage::notifyEditorConfigChange();
 }
@@ -264,7 +273,7 @@ QGroupBox *MarkdownEditorPage::setupGeneralGroup()
     {
         auto sectionLayout = new QHBoxLayout();
 
-        m_sectionNumberComboBox = WidgetsFactory::createComboBox(this);
+        m_sectionNumberComboBox = WidgetsFactory::createComboBox(box);
         m_sectionNumberComboBox->setToolTip(tr("Section number mode"));
         m_sectionNumberComboBox->addItem(tr("None"), (int)MarkdownEditorConfig::SectionNumberMode::None);
         m_sectionNumberComboBox->addItem(tr("Read"), (int)MarkdownEditorConfig::SectionNumberMode::Read);
@@ -273,7 +282,7 @@ QGroupBox *MarkdownEditorPage::setupGeneralGroup()
         connect(m_sectionNumberComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
                 this, &MarkdownEditorPage::pageIsChanged);
 
-        m_sectionNumberBaseLevelSpinBox = WidgetsFactory::createSpinBox(this);
+        m_sectionNumberBaseLevelSpinBox = WidgetsFactory::createSpinBox(box);
         m_sectionNumberBaseLevelSpinBox->setToolTip(tr("Base level to start section numbering in edit mode"));
         m_sectionNumberBaseLevelSpinBox->setRange(1, 6);
         m_sectionNumberBaseLevelSpinBox->setSingleStep(1);
@@ -281,7 +290,7 @@ QGroupBox *MarkdownEditorPage::setupGeneralGroup()
         connect(m_sectionNumberBaseLevelSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
                 this, &MarkdownEditorPage::pageIsChanged);
 
-        m_sectionNumberStyleComboBox = WidgetsFactory::createComboBox(this);
+        m_sectionNumberStyleComboBox = WidgetsFactory::createComboBox(box);
         m_sectionNumberStyleComboBox->setToolTip(tr("Section number style"));
         m_sectionNumberStyleComboBox->addItem(tr("1.1."), (int)MarkdownEditorConfig::SectionNumberStyle::DigDotDigDot);
         m_sectionNumberStyleComboBox->addItem(tr("1.1"), (int)MarkdownEditorConfig::SectionNumberStyle::DigDotDig);
@@ -298,6 +307,37 @@ QGroupBox *MarkdownEditorPage::setupGeneralGroup()
         const QString label(tr("Section number:"));
         layout->addRow(label, sectionLayout);
         addSearchItem(label, m_sectionNumberComboBox->toolTip(), m_sectionNumberComboBox);
+    }
+
+    {
+        m_plantUmlModeComboBox = WidgetsFactory::createComboBox(box);
+        m_plantUmlModeComboBox->setToolTip(tr("Use online service or local JAR file to render PlantUml graphs"));
+
+        m_plantUmlModeComboBox->addItem(tr("Online Service"), 0);
+        m_plantUmlModeComboBox->addItem(tr("Local JAR"), 1);
+
+        const QString label(tr("PlantUml:"));
+        layout->addRow(label, m_plantUmlModeComboBox);
+        addSearchItem(label, m_plantUmlModeComboBox->toolTip(), m_plantUmlModeComboBox);
+        connect(m_plantUmlModeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+                this, &MarkdownEditorPage::pageIsChanged);
+    }
+
+    {
+        auto jarLayout = new QHBoxLayout();
+
+        m_plantUmlJarFileInput = new LocationInputWithBrowseButton(box);
+        m_plantUmlJarFileInput->setToolTip(tr("Local JAR file to render PlantUML graphs"));
+        jarLayout->addWidget(m_plantUmlJarFileInput, 1);
+
+        auto testBtn = new QPushButton(tr("Test"), box);
+        jarLayout->addWidget(testBtn);
+
+        const QString label(tr("PlantUml JAR file:"));
+        layout->addRow(label, jarLayout);
+        addSearchItem(label, m_plantUmlJarFileInput->toolTip(), m_plantUmlJarFileInput);
+        connect(m_plantUmlJarFileInput, &LocationInputWithBrowseButton::textChanged,
+                this, &MarkdownEditorPage::pageIsChanged);
     }
 
     return box;

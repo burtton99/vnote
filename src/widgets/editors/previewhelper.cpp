@@ -221,13 +221,24 @@ void PreviewHelper::inplacePreviewCodeBlock(int p_blockPreviewIdx)
     if (checkPreviewSourceLang(SourceFlag::FlowChart, blockData.m_lang)
         || checkPreviewSourceLang(SourceFlag::WaveDrom, blockData.m_lang)
         || checkPreviewSourceLang(SourceFlag::Mermaid, blockData.m_lang)
-        || checkPreviewSourceLang(SourceFlag::PlantUml, blockData.m_lang)
-        || checkPreviewSourceLang(SourceFlag::Graphviz, blockData.m_lang)
+        || (checkPreviewSourceLang(SourceFlag::PlantUml, blockData.m_lang) && m_webPlantUmlEnabled)
+        || (checkPreviewSourceLang(SourceFlag::Graphviz, blockData.m_lang) && m_webGraphvizEnabled)
         || checkPreviewSourceLang(SourceFlag::Math, blockData.m_lang)) {
         emit graphPreviewRequested(p_blockPreviewIdx,
                                    m_codeBlockTimeStamp,
                                    blockData.m_lang,
                                    TextUtils::removeCodeBlockFence(blockData.m_text));
+        return;
+    }
+
+    if (!m_webPlantUmlEnabled && checkPreviewSourceLang(SourceFlag::PlantUml, blockData.m_lang)) {
+        // Local PlantUml.
+        return;
+    }
+
+    if (!m_webGraphvizEnabled && checkPreviewSourceLang(SourceFlag::Graphviz, blockData.m_lang)) {
+        // Local PlantUml.
+        return;
     }
 }
 
@@ -413,4 +424,14 @@ qreal PreviewHelper::getEditorScaleFactor() const
     }
 
     return 1;
+}
+
+void PreviewHelper::setWebPlantUmlEnabled(bool p_enabled)
+{
+    m_webPlantUmlEnabled = p_enabled;
+}
+
+void PreviewHelper::setWebGraphvizEnabled(bool p_enabled)
+{
+    m_webGraphvizEnabled = p_enabled;
 }

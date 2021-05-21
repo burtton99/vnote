@@ -11,6 +11,8 @@ class QComboBox;
 
 namespace vnotex
 {
+    class LocationInputWithBrowseButton;
+
     class MarkdownEditorPage : public SettingsPage
     {
         Q_OBJECT
@@ -60,6 +62,10 @@ namespace vnotex
         QCheckBox *m_smartTableCheckBox = nullptr;
 
         QCheckBox *m_spellCheckCheckBox = nullptr;
+
+        QComboBox *m_plantUmlModeComboBox = nullptr;
+
+        LocationInputWithBrowseButton *m_plantUmlJarFileInput = nullptr;
     };
 }
 

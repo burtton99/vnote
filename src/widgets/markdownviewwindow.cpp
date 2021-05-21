@@ -40,7 +40,7 @@ MarkdownViewWindow::MarkdownViewWindow(QWidget *p_parent)
 
     setupUI();
 
-    m_previewHelper = new PreviewHelper(nullptr, this);
+    setupPreviewHelper();
 }
 
 MarkdownViewWindow::~MarkdownViewWindow()
@@ -176,7 +176,12 @@ void MarkdownViewWindow::handleEditorConfigChange()
 
     if (markdownEditorConfig.revision() != m_markdownEditorConfigRevision) {
         m_markdownEditorConfigRevision = markdownEditorConfig.revision();
+
+        m_previewHelper->setWebPlantUmlEnabled(markdownEditorConfig.getWebPlantUml());
+        m_previewHelper->setWebGraphvizEnabled(markdownEditorConfig.getWebGraphviz());
+
         HtmlTemplateHelper::updateMarkdownViewerTemplate(markdownEditorConfig);
+
         if (m_editor) {
             auto config = createMarkdownEditorConfig(markdownEditorConfig);
             m_editor->setConfig(config);
@@ -945,4 +950,15 @@ ViewWindowSession MarkdownViewWindow::saveSession() const
                                             : m_editor->getCursorPosition().first;
     }
     return session;
+}
+
+void MarkdownViewWindow::setupPreviewHelper()
+{
+    Q_ASSERT(!m_previewHelper);
+
+    m_previewHelper = new PreviewHelper(nullptr, this);
+
+    const auto &markdownEditorConfig = ConfigMgr::getInst().getEditorConfig().getMarkdownEditorConfig();
+    m_previewHelper->setWebPlantUmlEnabled(markdownEditorConfig.getWebPlantUml());
+    m_previewHelper->setWebGraphvizEnabled(markdownEditorConfig.getWebGraphviz());
 }

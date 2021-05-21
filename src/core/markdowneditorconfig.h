@@ -48,6 +48,7 @@ namespace vnotex
         const WebResource &getExportResource() const;
 
         bool getWebPlantUml() const;
+        void setWebPlantUml(bool p_enabled);
 
         bool getWebGraphviz() const;
 

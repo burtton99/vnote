@@ -167,6 +167,11 @@ bool MarkdownEditorConfig::getWebPlantUml() const
     return m_webPlantUml;
 }
 
+void MarkdownEditorConfig::setWebPlantUml(bool p_enabled)
+{
+    updateConfig(m_webPlantUml, p_enabled, this);
+}
+
 bool MarkdownEditorConfig::getWebGraphviz() const
 {
     return m_webGraphviz;
